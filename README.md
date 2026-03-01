@@ -51,6 +51,7 @@ max_concurrent_requests = 16
 [markets]
 # 市场搜索配置
 max_search_results = 50     # 搜索最大返回数量（默认 50）
+max_scan_pages = 20         # 扫描页数（每页 100，默认 20=2000 市场）
 ```
 
 ## 使用
@@ -68,6 +69,7 @@ max_search_results = 50     # 搜索最大返回数量（默认 50）
 # 搜索市场（结果自动保存到数据库）
 ./target/release/ploy-clean search-markets --query "Trump"
 ./target/release/ploy-clean search-markets --query "Bitcoin" --limit 10
+./target/release/ploy-clean search-markets --query "nuclear" --scan-pages 50  # 深度扫描
 
 # 对指定市场执行自适应采样
 ./target/release/ploy-clean sample --market-id <ID> --token-id <TOKEN>
@@ -87,6 +89,7 @@ max_search_results = 50     # 搜索最大返回数量（默认 50）
 | `fetch-markets` | 获取所有市场列表 | `./ploy-clean fetch-markets` |
 | `get-market` | 获取单个市场详情 | `./ploy-clean get-market --id 517310` |
 | `search-markets` | 搜索市场并保存到数据库 | `./ploy-clean search-markets -q "Trump"` |
+| | | `./ploy-clean search-markets -q "nuclear" --scan-pages 50` |
 | `sample` | 对指定市场执行自适应采样 | `./ploy-clean sample -m 517310 -t <TOKEN>` |
 | `run` | 运行完整 ETL 流程 | `./ploy-clean run` |
 | `stats` | 显示统计信息 | `./ploy-clean stats` |
