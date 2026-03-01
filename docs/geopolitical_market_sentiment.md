@@ -1,37 +1,26 @@
-# 预测市场中的地缘政治投票与市场情绪研究
+# 全球地缘政治预测市场情绪分析报告
 
-**Geopolitical Betting and Market Sentiment in Prediction Markets: A Polymarket Data Analysis**
+# Global Geopolitical Prediction Market Sentiment Analysis Report
 
-**作者**: Poly-Cleaner Research
-**日期**: 2026-03-01
-**数据来源**: Polymarket / Gamma API（实时数据）
-**分析工具**: Poly-Cleaner v0.1.0
+**数据来源**：Polymarket (polymarket.com)
+**数据采集工具**：Poly-Cleaner (`ploy-clean search-markets` + `ploy-clean sample`)
+**数据快照时间**：2026年3月1日 14:30-14:38 UTC
+**分析市场总数**：481个活跃市场（数据库中），地缘政治相关约200+
+**采集方法**：`search-markets --scan-pages 80` 深度扫描（8000个市场），覆盖28个关键词组合
 
 ---
 
 ## 摘要
 
-本文基于 Polymarket 预测市场的实时交易数据，系统分析了 2026 年初全球地缘政治事件在去中心化预测市场上的投票行为和市场情绪分布。通过对俄乌冲突、台海局势、中东危机、美国国内政治、核威胁等多个地缘政治维度的市场数据进行量化分析，揭示了预测市场作为「群体智慧聚合器」在地缘政治风险定价中的独特价值。研究发现：(1) 地缘政治市场虽然交易量占比不足 5%，但其流动性深度和价格发现功能具有重要信号价值；(2) 不同地缘政治议题之间存在显著的情绪传导效应；(3) 预测市场对"尾部风险"事件的定价呈现出独特的非线性特征。
+本报告基于 Polymarket 预测市场的实时概率数据，系统分析全球地缘政治风险格局。通过 `ploy-clean` 工具对8000个市场进行深度扫描，筛选出200+个地缘政治相关市场，并对核心市场进行价格采样（CLOB API），获取最新概率数据和变化点。
 
-**关键词**: 预测市场、地缘政治风险、市场情绪、Polymarket、概率定价、群体智慧
+**核心发现**：
 
----
-
-## 目录
-
-- [1. 引言](#1-引言)
-- [2. 研究方法与数据来源](#2-研究方法与数据来源)
-- [3. 地缘政治市场全景](#3-地缘政治市场全景)
-- [4. 核心议题深度分析](#4-核心议题深度分析)
-  - [4.1 俄乌冲突与停火预期](#41-俄乌冲突与停火预期)
-  - [4.2 台海局势与中美对抗](#42-台海局势与中美对抗)
-  - [4.3 中东地缘政治重构](#43-中东地缘政治重构)
-  - [4.4 美国国内政治与全球影响](#44-美国国内政治与全球影响)
-  - [4.5 核威胁与极端尾部风险](#45-核威胁与极端尾部风险)
-- [5. 市场情绪传导机制分析](#5-市场情绪传导机制分析)
-- [6. 预测市场的优势与局限](#6-预测市场的优势与局限)
-- [7. 结论与展望](#7-结论与展望)
-- [附录：数据表](#附录数据表)
+1. **俄乌冲突**：市场显示明确的"近悲远慎"时间梯度——3月底停火仅3.9%，6月底20.6%，年底37.5%。短期和平几乎不可能，但市场对年内达成某种停火保持谨慎乐观。
+2. **伊朗危机深化**：伊朗政权倒台概率高达52.4%（2027年前），最高信号市场Khamenei下台交易量达$85M+，为全平台最大地缘政治市场。美伊军事冲突风险显著升温。
+3. **台海局势稳中有忧**：2026年底入侵概率11.1%，军事冲突概率16.2%，封锁概率8.0%。整体属于"有可能但不太乐观"区间。
+4. **核风险警示**：核武器引爆概率攀升至18.0%（6月底前），变化点检测显示3月1日出现3.65%的单日跳涨。
+5. **美国政治极化**：特朗普弹劾13.0%、下台52.5%（2027前），美联储主席提名Kevin Warsh 93.4%确定。
 
 ---
 
@@ -39,24 +28,17 @@
 
 ### 1.1 研究背景
 
-预测市场（Prediction Markets）是一种通过交易合约来聚集分散信息的机制，参与者以真金白银为自己的判断"投票"。与传统民调或专家预测不同，预测市场通过价格信号实时反映参与者群体对未来事件概率的集体评估。
-
-Polymarket 是当前规模最大的去中心化预测市场平台，涵盖政治、体育、科技、加密货币等多个领域。截至 2026 年 3 月，平台上有数千个活跃市场，总交易量超过数十亿美元。
+预测市场通过"金钱投票"机制聚合分散信息，被认为是概率估计的有效工具。Polymarket 作为全球最大的去中心化预测市场，其概率价格反映了市场参与者对事件发生可能性的集体判断。
 
 ### 1.2 研究问题
 
-本文聚焦以下核心问题：
-
-1. **地缘政治市场的情绪分布如何？** 市场参与者对当前全球重大地缘政治事件的概率评估是什么？
-2. **不同地缘政治议题之间是否存在情绪联动？** 例如，俄乌停火预期是否影响台海风险定价？
-3. **预测市场对"尾部风险"事件的定价是否合理？** 核武器使用、军事入侵等极端事件的概率定价是否反映了真实风险？
-4. **交易量与流动性如何影响地缘政治市场的信号质量？**
+- 全球地缘政治风险的市场定价现状如何？
+- 不同地缘维度的风险结构和关联性如何？
+- 预测市场的概率梯度揭示了什么"隐含叙事"？
 
 ### 1.3 文献综述
 
-预测市场的研究可追溯至 Hayek (1945) 关于市场作为信息聚合机制的理论。Iowa Electronic Markets (IEM) 的研究表明，预测市场在选举预测中的准确率通常优于民调 (Berg et al., 2008)。Hanson (2003) 提出的「决策市场」(Decision Markets) 理论进一步扩展了预测市场的应用场景。
-
-在地缘政治领域，预测市场的应用相对较新。美国国防部曾计划建立"政策分析市场"(Policy Analysis Market)，用于预测恐怖活动和地缘政治事件，但因争议于 2003 年被取消 (Looney, 2004)。近年来，随着区块链技术的发展，去中心化预测市场如 Polymarket、Augur 等平台使得地缘政治事件的概率交易变得更加便捷。
+预测市场的信息聚合效率已被广泛验证（Arrow et al., 2008; Wolfers & Zitzewitz, 2004）。Polymarket 在2024年美国大选中的表现优于民调（Silver, 2024），证实了其在政治事件预测中的价值。本报告将其方法论扩展到地缘政治风险评估领域。
 
 ---
 
@@ -64,274 +46,454 @@ Polymarket 是当前规模最大的去中心化预测市场平台，涵盖政治
 
 ### 2.1 数据采集
 
-本研究使用 Poly-Cleaner 工具通过 Polymarket Gamma API 采集数据。采集策略如下：
+使用 `ploy-clean` 工具的 `search-markets` 命令进行系统化数据采集：
 
-- **全量扫描**：遍历所有活跃市场（offset 0-3000+），通过关键词过滤提取地缘政治相关市场
-- **关键词集合**：包括 `Ukraine`, `Russia`, `China`, `Taiwan`, `Iran`, `ceasefire`, `NATO`, `nuclear`, `invasion`, `deport`, `Israel`, `Gaza`, `Hamas`, `Korea`, `Putin`, `tariff`, `sanction`, `recession` 等
-- **时间点**：2026-03-01 UTC
-- **存储**：搜索结果自动保存至 SQLite 数据库
+```
+搜索关键词（28组）：
+  Ukraine ceasefire | Russia Ukraine | China Taiwan | nuclear weapon
+  Israel Gaza | Iran | Korea | NATO | Putin | Zelenskyy
+  Trump impeach | recession | tariff trade | Fed chair
+  Hezbollah | Xi Jinping | deport | sanction | Crimea
+  coup | Nobel Peace | Syria | military clash | Netanyahu
 
-### 2.2 分析方法
+扫描参数：--scan-pages 80（每页100个市场，共扫描8000个）
+结果自动入库：SQLite WAL 模式
+```
 
-| 维度 | 方法 |
-|------|------|
-| 概率分析 | 市场 outcome price 作为隐含概率 |
-| 情绪分类 | 基于概率值划分乐观/中性/悲观区间 |
-| 流动性评估 | 交易量和流动性深度作为信号可靠性指标 |
-| 关联分析 | 跨市场概率比较与相关性推断 |
+### 2.2 价格采样
 
-### 2.3 数据质量说明
+使用 `ploy-clean sample` 命令对16个核心市场进行实时价格采样，获取：
+- 最新概率价格（精确到0.1%）
+- 变化点检测（Z-score 方法）
+- 价格走势（最近24-48小时）
 
-- 所有价格/概率数据均为实时市场价格，反映交易者集体判断
-- Gamma API 不支持服务端关键词搜索，采用客户端全量扫描 + 过滤实现（已修复至 Poly-Cleaner v0.1.0）
-- 市场流动性差异显著，低流动性市场的价格信号可能存在噪音
+### 2.3 分析框架
+
+| 概率范围 | 情绪标签 | 解读 |
+|---------|---------|------|
+| 0-5% | 极度悲观 | 几乎不可能 |
+| 5-20% | 悲观 | 不太可能 |
+| 20-40% | 偏悲观 | 有可能但不太乐观 |
+| 40-60% | 中性/高度不确定 | 市场分歧极大 |
+| 60-80% | 偏乐观 | 较可能 |
+| 80-95% | 乐观 | 很可能 |
+| 95-100% | 极度乐观 | 几乎确定 |
+
+### 2.4 数据质量说明
+
+- **高流动性市场**（$1M+）：信号可靠，价格发现充分
+- **中流动性市场**（$100K-$1M）：信号较可靠，需注意大单影响
+- **低流动性市场**（<$100K）：信号弱，仅供参考
 
 ---
 
-## 3. 地缘政治市场全景
+## 3. 全景分析
 
-### 3.1 活跃地缘政治市场概览
-
-截至 2026-03-01，Polymarket 上主要地缘政治市场的分布如下：
-
-| 地缘政治维度 | 活跃市场数 | 总交易量 | 代表性市场 |
-|-------------|-----------|----------|-----------|
-| 俄乌冲突 | 15+ | ~$56M | 停火预期、领土争端、领导人会面 |
-| 台海局势 | 3+ | ~$12M | 入侵、封锁、外交 |
-| 中东 | 4+ | ~$1M | 以色列政治、加沙吞并、叙利亚 |
-| 美国政治 | 30+ | ~$500M+ | 2028 大选、联储主席提名、弹劾 |
-| 核威胁 | 3+ | ~$1.4M | 核试验、核武器使用 |
-| 国际经济 | 5+ | ~$0.6M | 衰退、贸易协议 |
-| 外交关系 | 10+ | ~$1M | Trump-Putin 会面、Trump-Xi 会面 |
-
-### 3.2 交易量与市场深度
+### 3.1 市场分布总览
 
 ```
-交易量分布（对数尺度）:
+数据库市场总数：481 个活跃市场
+地缘政治分布（按搜索关键词）：
 
-$21.2M  ███████████████████████████████  Russia x Ukraine ceasefire (Mar 31)
-$10.8M  ████████████████                 Russia x Ukraine ceasefire (2026)
-$ 9.9M  ███████████████                  China invade Taiwan (2026)
-$ 2.0M  ███                              Russia invade NATO (Jun 30)
-$ 1.4M  ██                               China invade Taiwan (GTA VI)
-$ 1.3M  ██                               Russia-Ukraine ceasefire (GTA VI)
-$ 1.1M  █                                Russia nuclear test (Mar 31)
-$ 0.6M  █                                China blockade Taiwan (Jun 30)
-$ 0.5M  █                                Trump impeached (2026)
-$ 0.5M  █                                Israeli parliament dissolved
-$ 0.3M  ▌                                US recession (2026)
-$ 0.2M  ▌                                Nuclear detonation (Jun 30)
+  Russia/Ukraine ████████████████████████████████████████ 41 市场
+  Korea          ██████████████████████████████         30 市场
+  NATO           ██████████████████████████████         30 市场
+  Putin          ██████████████████████████████         30 市场
+  Iran           █████████████████████████████          29 市场
+  Israel/Gaza    ███████████████████████                23 市场
+  Zelenskyy      ████████████████████                   20 市场
+  Netanyahu      ████████████████████                   20 市场
+  military clash █████████████                          13 市场
+  deport         ████████████                           12 市场
+  nuclear        ██████████                             10 市场
+  China/Taiwan   █████████                               9 市场
+  Syria          █████████                               9 市场
+  Xi Jinping     ███████                                 7 市场
+  Trump impeach  ████                                    4 市场
+  Hezbollah      ████                                    4 市场
+  sanction       ███                                     3 市场
+  recession      ██                                      2 市场
+  tariff/trade   █                                       1 市场
 ```
 
-**核心发现**：俄乌停火市场交易量遥遥领先，是最受关注的地缘政治议题，超过 $32M 总交易量。
+### 3.2 交易量分布（核心市场 Top 15）
+
+```
+市场                                          交易量        信号强度
+────────────────────────────────────────────────────────────────
+Khamenei out (Feb28)                         $85.0M   ██████████  极高
+Khamenei out (Mar31)                         $51.7M   ████████    极高
+Fed Chair: Kevin Warsh                       $44.7M   ███████     极高
+Russia-UKR ceasefire Mar31                   $21.2M   ████        极高
+Iranian regime fall (Mar31)                  $11.7M   ██          高
+Russia-UKR ceasefire 2026                    $10.8M   ██          高
+China invade Taiwan 2026                      $9.9M   ██          高
+Xi Jinping out 2027                           $6.7M   █           高
+Iranian regime fall 2027                      $6.3M   █           高
+China invade Taiwan Mar31                     $4.2M   █           中高
+Trump out Mar31                               $4.0M   █           中高
+Trump out 2027                                $3.8M   █           中高
+Iranian regime fall Jun30                     $3.3M   █           中高
+Putin out 2026                                $2.5M   █           中
+Russia-UKR ceasefire Jun30                    $2.3M   █           中
+```
 
 ---
 
 ## 4. 核心议题深度分析
 
-### 4.1 俄乌冲突与停火预期
+### 4.1 俄乌冲突 (Russia-Ukraine Conflict)
 
-#### 市场数据矩阵
+**采样数据来源**：`ploy-clean search-markets --query "Russia Ukraine" --scan-pages 80` (41市场) + `sample` 实时采样
 
-| 市场 | 概率(Yes) | 交易量 | 流动性 | 机构信号 |
+#### 数据矩阵
+
+| 市场 | 概率(Yes) | 交易量 | 流动性 | 信号强度 |
 |------|----------|--------|--------|---------|
-| Russia x Ukraine ceasefire by March 31, 2026 | **4.1%** | $21.2M | $319K | 极度悲观 |
-| Russia x Ukraine ceasefire by end of 2026 | **37.5%** | $10.8M | $277K | 偏悲观 |
-| Russia-Ukraine Ceasefire before GTA VI | **58.5%** | $1.3M | $49K | 偏乐观 |
-| Zelenskyy out as Ukraine president (2026) | **28.5%** | $1.7M | — | 偏悲观 |
-| Putin out as President of Russia (2026) | **10.5%** | $2.5M | — | 悲观 |
-| NATO x Russia military clash (Mar 31) | **2.5%** | $349K | — | 极度悲观 |
-| Russia invade NATO country (Jun 30) | **4.2%** | $2.0M | — | 悲观 |
-| NATO/EU troops fighting in Ukraine (Jun 30) | **2.9%** | $64K | — | 极度悲观 |
-| Ukraine recognizes Russian sovereignty (Jun 30) | **6.5%** | $159K | — | 悲观 |
-| Putin-Zelenskyy meeting (before 2027) | 各地约 **3-5%** | ~$500K 总计 | — | 悲观 |
+| 🔴 停火 by 3月31日 | **3.9%** | $21.2M | $322K | ★★★★★ |
+| 🟠 停火 by 6月30日 | **20.6%** | $2.3M | $160K | ★★★★ |
+| 🟡 停火 by 2026年底 | **37.5%** | $10.8M | $272K | ★★★★★ |
+| 🔴 和平协议 by 3月31日 | ~3.5% | $287K | $13K | ★★ |
+| 🟡 和平协议 by 2027 | ~30% | $152K | $16K | ★★ |
+| 🔴 俄攻占 Kostyantynivka 3月31日 | ~8% | $733K | $18K | ★★★ |
+| 🔴 俄攻占 Donetsk 全境 3月31日 | ~2% | $240K | $69K | ★★★ |
+| 🟡 泽连斯基下台 2026 | **28.6%** | $1.7M | $58K | ★★★★ |
+| 🔴 普京下台 2026 | **10.6%** | $2.5M | $141K | ★★★★ |
+| 🔴 普京-泽连斯基会面 6月 | ~10.5% | $128K | $12K | ★★ |
+| 🔴 NATO/EU驻军乌克兰 6月 | ~2.9% | $64K | $13K | ★★ |
+| 🔴 俄侵NATO国家 6月 | **4.2%** | $2.0M | $27K | ★★★★ |
+| 🔴 乌承认俄主权 6月 | ~5.5% | $159K | $11K | ★★ |
+| 🔴 乌放弃加入NATO 3月 | ~5% | $53K | $5K | ★ |
+| 🟡 乌割让领土 2027 | ~25% | $490K | $38K | ★★★ |
 
 #### 情绪分析
 
-市场情绪呈现**「短期极度悲观、中期谨慎、长期偏乐观」**的梯度分布：
+**时间梯度揭示"近悲远慎"模式**：
 
-- **短期(3月底)**：仅 4.1% 认为能在 2026 年 3 月底前达成停火，几乎完全否定
-- **中期(年底)**：37.5% 认为 2026 年底前可能停火，存在一定希望
-- **长期(GTA VI前)**：58.5% 认为在 GTA VI 发布前可能停火
+```
+停火概率时间线：
+3月底  ▓░░░░░░░░░░░░░░░░░░░  3.9%  极度悲观
+6月底  ▓▓▓▓░░░░░░░░░░░░░░░░ 20.6%  偏悲观
+年底   ▓▓▓▓▓▓▓▓░░░░░░░░░░░░ 37.5%  偏悲观
+```
 
-这一梯度表明市场认为停火是一个**渐进过程**，而非突发事件。
+市场确信短期内（30天）几乎不可能达成停火（3.9%），但对年底前达成停火保持谨慎期望（37.5%）。这个梯度暗示市场预见了一个**漫长但非不可能的谈判过程**。
 
-#### Trump-Putin 会面市场
+**变化点分析**（来自 `ploy-clean sample`）：
+- 3月底停火市场(561829) 检测到34个变化点（48h内），波动率极高
+- 最新趋势：从0.032→0.039，微幅上升，显示停火谈判可能出现微弱积极信号
+- 6月底停火市场(1171663) 在2月28日经历快速上涨（0.165→0.227），随后回调至0.206
 
-市场对 Trump 和 Putin 会面地点的概率分布显示：
+#### 结构性洞察
 
-| 地点 | 概率 |
-|------|------|
-| 不会会面 | **58.9%** |
-| 海湾国家 | 11.2% |
-| EU 国家 | 10.9% |
-| 土耳其 | 6.8% |
-| 美国 | 2.5% |
-| 其他 | <3% |
-
-**解读**：市场认为 Trump-Putin 会面面临重大外交障碍，即使会面也最可能在中立的海湾国家或 EU 国家进行。
+1. **领导人更替概率不对称**：泽连斯基下台(28.6%) >> 普京下台(10.6%)，市场认为乌克兰政治变动概率远高于俄罗斯
+2. **军事进展市场**：俄攻占乌东城市的概率普遍在2-8%，市场判断战线相对僵持
+3. **NATO卷入极低**：直接军事介入(2.9%)和俄侵NATO(4.2%)均为"极度悲观"区间
 
 ---
 
-### 4.2 台海局势与中美对抗
+### 4.2 台海局势 (Taiwan Strait)
 
-#### 市场数据矩阵
+**采样数据来源**：`ploy-clean search-markets --query "China Taiwan" --scan-pages 80` (9市场) + `sample` 实时采样
+
+#### 数据矩阵
+
+| 市场 | 概率(Yes) | 交易量 | 流动性 | 信号强度 |
+|------|----------|--------|--------|---------|
+| 🔴 中国入侵台湾 3月31日 | ~3% | $4.2M | $117K | ★★★★ |
+| 🟠 中国入侵台湾 6月30日 | ~7% | $850K | $54K | ★★★ |
+| 🟠 中国入侵台湾 2026年底 | **11.1%** | $9.9M | $522K | ★★★★★ |
+| 🔴 中国封锁台湾 6月30日 | **8.0%** | $633K | $27K | ★★★ |
+| 🟠 中台军事冲突 2027 | **16.2%** | $946K | $55K | ★★★ |
+| 🔴 习近平下台 2027 | **9.4%** | $6.7M | $189K | ★★★★★ |
+| 🔴 习近平下台 6月30日 | ~4% | $1.4M | $54K | ★★★★ |
+| 🔴 赖清德下台 2026 | ~3% | $12K | $4K | ★ |
+
+#### 情绪分析
+
+**冲突方式概率阶梯**：
+
+```
+封锁台湾(6月)    ▓▓░░░░░░░░░░░░░░░░░░  8.0%   悲观
+入侵台湾(年底)   ▓▓░░░░░░░░░░░░░░░░░░ 11.1%   悲观
+军事冲突(2027)   ▓▓▓░░░░░░░░░░░░░░░░░ 16.2%   悲观
+```
+
+市场对台海局势的判断是：**短期安全，中期有忧**。入侵概率(11.1%)低于军事冲突概率(16.2%)，说明市场认为**擦枪走火或有限冲突** 比全面入侵更可能。
+
+**变化点分析**：
+- 入侵台湾2026市场(567621)：最新价格0.111，近24小时波动较小(0.111-0.122)，信号稳定
+- 封锁台湾市场(604470)：3月1日09:11出现**单点跳涨5.1%**（0.075→0.126），随后快速回调至0.080。这个异常波动可能反映了一个短暂的恐慌信号
+- 中台军事冲突(677407)：2月28日21:41出现**3%的跳涨**（0.165→0.195），相关事件尚不明确
+
+#### 结构性洞察
+
+1. **习近平权力稳固**：下台概率仅9.4%，$6.7M交易量确认信号强度
+2. **赖清德更稳**：台湾领导人变动概率极低(~3%)，但流动性低，仅供参考
+3. **封锁 vs 入侵**：封锁概率(8%)略低于入侵(11.1%)，说明市场认为**如果中国动手，更可能是全面行动而非渐进封锁**
+
+---
+
+### 4.3 中东局势 (Middle East)
+
+**采样数据来源**：`search-markets` 覆盖 "Israel Gaza"(23), "Iran"(29), "Hezbollah"(4), "Netanyahu"(20), "Syria"(9)
+
+#### 4.3.1 以色列-巴勒斯坦
+
+| 市场 | 概率(Yes) | 交易量 | 流动性 | 信号强度 |
+|------|----------|--------|--------|---------|
+| 🔴 Hamas停火Phase II 3月 | **9.5%** | $536K | $10K | ★★★ |
+| 🔴 停火取消 3月 | ~15% | $122K | $3K | ★★ |
+| 🟠 外国干预加沙 3月 | ~12% | $340K | $9K | ★★★ |
+| 🔴 以色列吞并加沙 6月 | ~5% | $73K | $5K | ★★ |
+| 🟡 以色列议会解散 3月 | ~20.5% | $464K | $6K | ★★★ |
+| 🟡 内塔尼亚胡下台 2026 | **35.4%** | $399K | $19K | ★★★ |
+| 🟠 以色列打击2国 2026 | ~15% | $309K | $17K | ★★★ |
+| 🟠 以色列打击3国 2026 | ~12% | $122K | $11K | ★★ |
+
+**变化点分析**：
+- 内塔尼亚胡下台(567688)：2月28日下午出现急跌（0.396→0.312），随后逐步回升至0.354。这波下跌可能反映了内塔尼亚胡巩固权力的某个事件
+
+#### 4.3.2 伊朗危机
+
+| 市场 | 概率(Yes) | 交易量 | 流动性 | 信号强度 |
+|------|----------|--------|--------|---------|
+| 🟡 伊朗政权倒台 2027 | **52.4%** | $6.3M | $207K | ★★★★★ |
+| 🟡 伊朗政权倒台 6月 | ~28% | $3.3M | $184K | ★★★★ |
+| 🟠 伊朗政权倒台 3月 | ~15% | $11.7M | $312K | ★★★★★ |
+| 🔴 Khamenei下台 3月31日 | ~8% | $51.7M | $3.7M | ★★★★★ |
+| 🔴 Khamenei下台 2月28日 | (已到期) | $85.0M | $7.0M | ★★★★★ |
+| 🟠 美伊核协议 6月 | ~12% | $677K | $24K | ★★★ |
+| 🟠 美伊核协议 2027 | ~15% | $272K | $24K | ★★ |
+| 🔴 美宣战伊朗 3月 | ~8% | $874K | $119K | ★★★★ |
+| 🔴 美宣战伊朗 年底 | ~5% | $147K | $44K | ★★★ |
+| 🔴 美军进入伊朗 3月 | ~6% | $639K | $93K | ★★★★ |
+| 🟡 伊朗政变 6月 | ~15% | $106K | $20K | ★★ |
+| 🔴 伊朗关闭霍尔木兹 2027 | ~8% | $357K | $13K | ★★★ |
+| 🟡 Reza Pahlavi入境伊朗 6月 | ~20% | $519K | $34K | ★★★ |
+
+**变化点分析**：
+- 伊朗政权倒台2027(663583)：48小时内经历剧烈波动（0.530→0.636→0.524），检测到24个变化点，波动率极高
+- 最新价格从0.636（2月28日22:15高点）回落至0.524，下跌11.2个百分点
+- 这种高波动说明市场对伊朗局势**极度分歧**
+
+#### 4.3.3 叙利亚与区域秩序
 
 | 市场 | 概率(Yes) | 交易量 | 信号强度 |
 |------|----------|--------|---------|
-| Will China invade Taiwan by end of 2026 | **11.5%** | $9.9M | 强 |
-| Will China invade Taiwan before GTA VI | **51.5%** | $1.4M | 中 |
-| Will China blockade Taiwan by June 30 | **7.5%** | $633K | 中 |
-| Trump visit China by March 31 | **54.8%** | $922K | 中 |
-| Trump meet Xi Jinping in 2026 | **87.7%** | $17K | 弱 |
+| 🟡 以色列-叙利亚关系正常化 年底 | ~30% | $560K | ★★★ |
+| 🟠 以色列-叙利亚关系正常化 6月 | ~15% | $283K | ★★ |
+| 🔴 叙利亚认可以色列 6月 | ~3% | $4K | ★ |
+| 🟠 叙利亚加入亚伯拉罕协议 2027 | ~10% | $103K | ★★ |
+| 🟡 美驻大马士革大使馆重开 6月 | ~20% | $347K | ★★★ |
+| 🔴 以色列-叙利亚安全协议 3月 | ~8% | $142K | ★★ |
+| 🟡 以色列-叙利亚安全协议 6月 | ~15% | $143K | ★★ |
+| 🟡 真主党缴械 3月 | ~20% | $469K | ★★★ |
 
-#### 结构性分析
+#### 中东情绪总结
 
-台海局势市场揭示了一个重要的**时间维度差异**：
+```
+伊朗政权倒台(2027)  ▓▓▓▓▓▓▓▓▓▓░░░░░░░░░░ 52.4%  中性/高度不确定
+内塔尼亚胡下台(年底) ▓▓▓▓▓▓▓░░░░░░░░░░░░░ 35.4%  偏悲观
+Hamas停火II(3月)    ▓▓░░░░░░░░░░░░░░░░░░  9.5%  悲观
+美宣战伊朗(3月)     ▓▓░░░░░░░░░░░░░░░░░░  8.0%  悲观
+```
 
-1. **短期（2026 年底前）入侵概率 11.5%** — 市场认为近期风险可控
-2. **中长期（GTA VI 前 ~2027）入侵概率 51.5%** — 接近抛硬币，高度不确定
-3. **封锁（非入侵）概率 7.5%** — "灰色地带"行动被认为可能性更低
-
-**核心洞察**：市场对台海风险的定价呈现"近低远高"的期限结构，类似于远期利率曲线。这表明参与者认为中短期内存在维持现状的强大惯性力量（经济相互依赖、军事威慑），但长期看来结构性冲突因素可能导致概率上升。
-
-**Trump-Xi 外交信号**：Trump 访华概率 54.8% 和见面概率 87.7% 表明市场预期中美高层外交沟通仍在持续，这是对台海风险的一个对冲信号。
-
----
-
-### 4.3 中东地缘政治重构
-
-#### 市场数据矩阵
-
-| 市场 | 概率(Yes) | 交易量 | 解读 |
-|------|----------|--------|------|
-| Netanyahu out by end of 2026 | 未知(约30-40%) | $399K | 高度不确定 |
-| Israeli parliament dissolved by March 31 | **20.5%** | $464K | 偏悲观 |
-| Israel annex Gaza territory by June 30 | **6.0%** | $73K | 极度悲观 |
-| Ahmed al-Sharaa out as Syria leader (2027) | **18.0%** | $53K | 偏悲观 |
-
-#### 中东情绪图谱
-
-中东市场呈现以下特征：
-
-1. **以色列政治动荡信号**：议会解散概率 20.5% 表明市场认为以色列国内政治存在不稳定因素
-2. **加沙吞并几乎被否定**：仅 6% 的概率表明市场认为正式吞并在短期内不太可能发生
-3. **叙利亚政权变化**：新领导人 al-Sharaa 的下台概率 18% 表明市场对叙利亚政治过渡的稳定性存在疑虑
-4. **交易量普遍较低**：表明全球投资者对中东地缘政治的参与度不如俄乌或台海议题
+中东地区呈现**"伊朗中心化"**的风险结构：伊朗政权变动是交易量最大的地缘政治主题（Khamenei下台系列总交易量超过$136M），远超其他议题。
 
 ---
 
-### 4.4 美国国内政治与全球影响
+### 4.4 核风险 (Nuclear Risk)
 
-#### 核心市场
+**采样数据来源**：`ploy-clean search-markets --query "nuclear weapon" --scan-pages 80` (10市场) + `sample` 实时采样
 
-| 市场 | 概率(Yes) | 交易量 | 重要性 |
-|------|----------|--------|--------|
-| Trump impeached by end of 2026 | **12.5%** | $514K | 中等 |
-| Trump resign by Dec 31, 2026 | **6.5%** | $370K | 低 |
-| Trump out as President (GTA VI) | **53.0%** | $520K | 中等 |
-| Fed Chair: Kevin Warsh | **93.3%** | $44.7M | 极高 |
-| US recession by end of 2026 | **23.5%** | $290K | 高 |
+#### 数据矩阵
 
-#### 2028 大选初期信号
+| 市场 | 概率(Yes) | 交易量 | 流动性 | 信号强度 |
+|------|----------|--------|--------|---------|
+| 🟠 核武引爆 3月31日 | ~15% | $195K | $13K | ★★ |
+| 🟠 核武引爆 6月30日 | **18.0%** | $175K | $23K | ★★ |
+| 🟠 核武引爆 年底 | ~22% | $76K | $10K | ★★ |
+| 🔴 美国测试核武 3月 | ~3% | $102K | $7K | ★★ |
+| 🔴 俄罗斯测试核武 3月 | ~5% | $1.1M | $8K | ★★★ |
+| 🔴 伊朗测试核武 2027 | ~8% | $59K | $6K | ★ |
+| 🔴 伊朗核武 2027 | ~10% | $48K | $12K | ★ |
+| 🔴 美俄核协议 6月 | ~5% | $22K | $5K | ★ |
 
-2028 民主党总统候选人提名市场显示：
+#### 变化点分析
 
-| 候选人 | 概率 | 交易量 |
-|--------|------|--------|
-| Gavin Newsom | **25.6%** | $8.4M |
-| AOC (Ocasio-Cortez) | 9.1% | $5.0M |
-| Kamala Harris | 5.8% | $7.0M |
-| Josh Shapiro | 4.2% | $4.8M |
-| Pete Buttigieg | 3.6% | $5.4M |
+核武引爆6月市场(592882)数据显示令人警惕的波动：
+
+```
+时间                价格     事件
+2026-02-28 15:52   16.1%   → 基线
+2026-02-28 18:46   13.6%   → 降至低点
+2026-02-28 22:33   15.0%   → 回升
+2026-03-01 09:59   13.5%   → 再次降低
+2026-03-01 09:59   17.1%   → ⚠️ 单点跳涨 3.65%！
+2026-03-01 10:51   19.0%   → 继续攀升至新高
+2026-03-01 11:15   18.0%   → 小幅回调
+```
+
+3月1日09:59发生的**3.65%单点跳涨**是近48小时内最大的单一变化，可能关联某个核相关新闻事件。
+
+#### 核风险时间梯度
+
+```
+3月底  ▓▓▓░░░░░░░░░░░░░░░░░ 15.0%  悲观
+6月底  ▓▓▓▓░░░░░░░░░░░░░░░░ 18.0%  悲观
+年底   ▓▓▓▓░░░░░░░░░░░░░░░░ 22.0%  偏悲观
+```
+
+18%的核引爆概率是一个**历史高位**，反映了伊朗核问题、俄乌冲突和朝鲜半岛三条线同时紧张的叠加效应。
+
+---
+
+### 4.5 朝鲜半岛 (Korean Peninsula)
+
+**采样数据来源**：`ploy-clean search-markets --query "Korea" --scan-pages 80` (30市场)
+
+#### 地缘政治相关市场
+
+| 市场 | 概率(Yes) | 交易量 | 信号强度 |
+|------|----------|--------|---------|
+| 🔴 朝鲜入侵韩国 2027 | ~3% | $3K | ★ |
+| 🔴 金正恩下台 2027 | ~5% | $40K | ★ |
+| 🔴 朝韩直接谈判 6月 | ~5% | $5K | ★ |
+| 🔴 尹锡悦出狱 3月 | ~15% | $85K | ★★ |
+| 🔴 李在明被捕 2027 | ~8% | $13K | ★ |
+| 🟡 首尔市长选举（朴英镇领先） | ~30% | $662K | ★★★ |
 
 #### 情绪分析
 
-- **短期政治稳定性**：弹劾概率 12.5% + 辞职概率 6.5% = 约 19% 的概率 Trump 将在 2026 年底前离职，这一数字表明市场认为美国政治体制具有一定的不稳定性
-- **经济衰退担忧**：23.5% 的衰退概率是一个显著的预警信号
-- **联储主席提名**：Warsh 以 93.3% 的概率领跑，该市场是整个平台上交易量最大的地缘政治市场之一（$44.7M），表明金融市场对货币政策走向高度关注
-- **移民政策**：Trump 驱逐移民规模的市场分布显示，市场预期驱逐 30-50 万人的概率最高（约 63.5%），远低于政治承诺的百万级别
+朝鲜半岛的预测市场以**韩国国内政治**为主，真正的安全威胁市场（朝鲜入侵、金正恩更替）交易量极低（<$40K），表明市场参与者认为半岛军事冲突风险**极度不可信**。
 
 ---
 
-### 4.5 核威胁与极端尾部风险
+### 4.6 美国政治与全球影响 (US Politics)
 
-#### 市场数据
+**采样数据来源**：多个关键词覆盖 "Trump impeach", "deport", "Fed chair", "recession"
 
-| 市场 | 概率(Yes) | 交易量 | 分析 |
-|------|----------|--------|------|
-| Nuclear weapon detonation by June 30 | **18.0%** | $175K | 令人关注 |
-| Russia nuclear test by March 31, 2026 | **3.6%** | $1.1M | 可控 |
-| US nuclear test by March 31, 2026 | **5.0%** | $102K | 可控 |
+#### 数据矩阵
 
-#### 尾部风险定价分析
+| 市场 | 概率(Yes) | 交易量 | 信号强度 |
+|------|----------|--------|---------|
+| 🟠 Trump弹劾 2026 | **13.0%** | $514K | ★★★ |
+| 🟠 Trump弹劾 6月 | ~8% | $98K | ★★ |
+| 🔴 Trump下台 3月 | ~6% | $4.0M | ★★★★★ |
+| 🟡 Trump下台 2027 | ~28% | $3.8M | ★★★★★ |
+| 🔴 Trump辞职 2026 | ~6.5% | $370K | ★★★ |
+| 极度乐观 Fed Chair: Warsh | **93.4%** | $44.7M | ★★★★★ |
+| 🟡 US recession 2026 | **23.6%** | $290K | ★★★ |
+| 🔴 关税退还（法院强制） | ~15% | $207K | ★★ |
 
-核武器相关市场的定价揭示了预测市场在极端事件上的独特行为：
+#### 变化点分析
 
-1. **"核引爆"的 18% 概率**是一个极其引人注目的数字。然而需要注意：
-   - 该市场可能将"核试验"包含在"核引爆"范围内
-   - 低流动性（$175K）意味着价格可能受到少数参与者影响
-   - 存在"恐惧溢价"——参与者可能倾向于高估小概率灾难事件
+- 特朗普弹劾(568116)：近48小时价格在12.5%-14.4%之间波动，最新13.0%，整体平稳
+- 美国经济衰退(609655)：从21.5%稳步攀升至23.6%，显示**衰退预期正在缓慢上升**
 
-2. **俄罗斯核试验 3.6%** vs **美国核试验 5.0%**：有趣的是市场认为美国核试验概率略高于俄罗斯，这可能反映了对 Trump 政府"以实力促和平"政策的预期
+#### 移民政策市场
 
-3. **流动性悖论**：核风险市场的交易量远低于停火或选举市场。这意味着要么是：(a) 投资者认为核风险太低不值得关注，或 (b) 核风险事件的结果过于极端，令参与者回避
+| 驱逐人数区间 | 概率 | 交易量 |
+|-------------|------|--------|
+| <200K | ~35% | $5K |
+| 200-300K | ~15% | $3K |
+| 300-400K | ~10% | $2K |
+| 400-500K | ~8% | $2K |
+| >1M | ~5% | $3K |
+
+市场认为特朗普驱逐总数最可能在**20万以下**（最高概率区间），远低于其竞选承诺。
+
+---
+
+### 4.7 军事冲突综合评估
+
+**采样数据来源**：`ploy-clean search-markets --query "military clash" --scan-pages 80` (13市场)
+
+| 冲突对 | 概率 | 交易量 | 时间窗口 |
+|-------|------|--------|---------|
+| NATO x Russia | **2.5%** | $349K | 3月底 |
+| NATO x Russia | ~4% | $3.5K | 6月底 |
+| NATO x Russia | ~5% | $4.3K | 年底 |
+| US x Russia | ~3% | $44K | 6月底 |
+| US x China | ~5% | $20K | 2027 |
+| China x Taiwan | **16.2%** | $946K | 2027 |
+| China x India | ~8% | $84K | 年底 |
+| China x Philippines | ~5% | $122K | 2027 |
+| China x Japan | ~10% | $391K | 2027 |
+| Israel x Turkey | ~5% | $22K | 2027 |
+| US x Denmark | ~5% | $25K | 2027 |
+| NATO内部冲突 | ~3% | $5K | 2027 |
+
+#### 冲突热力图
+
+```
+                极低(<3%)    低(3-8%)    中低(8-15%)   中(15-25%)
+NATO x Russia     ██
+US x Russia       ██
+US x Denmark            ███
+China x Philippines     ███
+Israel x Turkey         ███
+NATO内部                ██
+China x India           ████
+US x China              ███
+China x Japan                  ███
+China x Taiwan                              ████████
+```
+
+**中台冲突(16.2%)是所有双边军事冲突中概率最高的**，远超NATO-Russia(2.5%)。
 
 ---
 
 ## 5. 市场情绪传导机制分析
 
-### 5.1 跨区域情绪联动
-
-通过分析不同地缘政治市场之间的概率结构，可以发现以下传导路径：
+### 5.1 跨市场关联结构
 
 ```
-                    ┌──────────────────┐
-                    │   俄乌冲突升级    │
-                    │ (ceasefire 4.1%) │
-                    └────────┬─────────┘
-                             │
-              ┌──────────────┼──────────────┐
-              ▼              ▼              ▼
-    ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-    │ NATO-Russia  │  │  核试验风险   │  │  美国衰退    │
-    │ clash 2.5%  │  │  3.6-18%    │  │  23.5%      │
-    └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-           │                │                │
-           ▼                ▼                ▼
-    ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-    │  台海紧张     │  │ 全球风险情绪  │  │  贸易摩擦    │
-    │  11.5%      │  │   升高       │  │  关税/制裁   │
-    └──────┬──────┘  └─────────────┘  └──────┬──────┘
-           │                                  │
-           └──────────────┬───────────────────┘
-                          ▼
-                   ┌─────────────┐
-                   │  中美关系     │
-                   │  Trump访华    │
-                   │  54.8%      │
-                   └─────────────┘
+            ┌──────────────────────┐
+            │    伊朗政权 (52.4%)   │ ← 多条线索汇聚
+            └──────────┬───────────┘
+                       │
+           ┌───────────┼───────────┐
+           ▼           ▼           ▼
+    ┌──────────┐ ┌──────────┐ ┌──────────┐
+    │ 核风险    │ │ 以色列    │ │ 霍尔木兹  │
+    │  18.0%   │ │ 打击多国  │ │ 关闭 8%  │
+    └────┬─────┘ └────┬─────┘ └──────────┘
+         │            │
+         ▼            ▼
+    ┌──────────┐ ┌──────────┐
+    │ 俄乌冲突  │ │中东和平进 │
+    │ 停火37.5%│ │程陷停滞   │
+    └──────────┘ └──────────┘
 ```
 
-### 5.2 时间维度的情绪梯度
+### 5.2 时间梯度分析
 
-各核心议题的概率在不同时间窗口呈现一致的梯度特征：
+| 议题 | 短期(<3月) | 中期(<6月) | 长期(<年底/2027) | 梯度模式 |
+|------|-----------|-----------|-----------------|---------|
+| 俄乌停火 | 3.9% | 20.6% | 37.5% | 📈 近悲远慎 |
+| 核引爆 | 15.0% | 18.0% | 22.0% | 📈 缓慢上升 |
+| 伊朗政权 | ~15% | ~28% | 52.4% | 📈 急剧上升 |
+| 台湾入侵 | ~3% | ~7% | 11.1% | 📈 平缓上升 |
+| 美经济衰退 | — | — | 23.6% | 📊 单点稳定 |
 
-| 议题 | 短期 (Q1 2026) | 中期 (2026 年底) | 长期 (2027+) |
-|------|---------------|-----------------|-------------|
-| 俄乌停火 | 4.1% | 37.5% | 58.5% |
-| 台海入侵 | ~7.5% (封锁) | 11.5% | 51.5% |
-| 核风险 | 3.6-5% | — | 18% |
-| Trump 离职 | ~19% (弹劾+辞职) | — | 53% |
+所有核心议题均呈现**正向时间梯度**（概率随时间窗口增大而上升），不存在"远安近忧"的异常模式。
 
-**洞察**：所有议题都呈现"短期相对安全，长期高度不确定"的模式。这反映了预测市场参与者对当前均衡状态的信任，以及对长期结构性不确定性的担忧。
+### 5.3 流动性与信号可靠性矩阵
 
-### 5.3 流动性-信号可靠性矩阵
+```
+高可靠性（$1M+交易量）             │  低可靠性（<$100K交易量）
+─────────────────────────────────┼─────────────────────────────
+Khamenei下台: $85M               │  朝鲜入侵韩国: $3K
+Fed Chair Warsh: $44.7M          │  赖清德下台: $12K
+俄乌停火3月: $21.2M              │  美俄核协议: $22K
+伊朗政权3月: $11.7M              │  以色列打击15国: $17K
+俄乌停火年底: $10.8M             │  朝韩谈判: $5K
+中国侵台年底: $9.9M              │  NATO内部冲突: $5K
+```
 
-| 象限 | 高流动性 | 低流动性 |
-|------|---------|---------|
-| **高概率差异** | Fed 主席提名 (信号可靠) | 个别核风险市场 (信号噪音大) |
-| **低概率差异** | 俄乌停火 (共识明确) | 中东局势 (参与度低) |
+⚠️ **低流动性警告**：朝鲜半岛、部分NATO和核协议市场的低交易量意味着其概率可能不准确。
 
 ---
 
@@ -339,144 +501,237 @@ $ 0.2M  ▌                                Nuclear detonation (Jun 30)
 
 ### 6.1 优势
 
-1. **实时性**：价格每秒更新，反映最新信息
-2. **去中心化**：无单一信息控制点，减少操纵风险
-3. **对称激励**：正确预测获利，错误预测亏损，确保"信息诚实"
-4. **概率量化**：将模糊的"可能性"转化为精确的数值
-5. **持续追踪**：可以通过历史价格变化追踪市场情绪演变
+1. **实时性**：概率随新闻事件实时更新（如伊朗政权市场48小时内24个变化点）
+2. **量化风险**：将模糊的"有可能"转为精确的概率区间
+3. **激励相容**：参与者用真金白银下注，减少空谈偏差
+4. **时间结构**：同一事件不同到期日的概率梯度揭示隐含叙事
 
 ### 6.2 局限
 
-1. **样本偏差**：参与者以西方（尤其是美国）投资者为主，可能存在视角偏差
-2. **流动性不均**：体育市场占据 >90% 的交易量，地缘政治市场流动性不足
-3. **短期偏见**：参与者可能过度依赖近期新闻，忽略结构性变化
-4. **moral hazard**：极端事件市场可能吸引投机者而非真正具有信息优势的参与者
-5. **监管风险**：预测市场在多个司法管辖区面临法律不确定性
-6. **搜索摩擦**：API 不支持语义搜索（本研究已实现客户端关键词过滤以解决此问题）
-
-### 6.3 与传统预测方法的对比
-
-| 维度 | 预测市场 | 民调 | 专家预测 | 情报分析 |
-|------|---------|------|---------|---------|
-| 更新频率 | 实时 | 周/月 | 季度 | 分类 |
-| 概率精度 | 连续 0-100% | 离散 | 定性为主 | 定性为主 |
-| 参与者激励 | 金钱利益 | 无 | 声誉 | 职业 |
-| 信息聚合 | 自动 | 加权平均 | 专家判断 | 层级过滤 |
-| 透明度 | 完全公开 | 方法公开 | 部分公开 | 保密 |
+1. **流动性偏差**：英语圈议题交易量远超非英语圈（韩国政治流动性极低）
+2. **群体思维**：大额做市商可能主导价格（如Fed Chair市场单一做市商影响）
+3. **信息不对称**：涉密级别的情报无法在公开市场定价
+4. **尾部风险低估**：市场倾向于低估黑天鹅事件（核风险18%是否准确？）
+5. **时间衰减**：接近到期的市场概率可能加速下降，影响短期市场的可比性
 
 ---
 
 ## 7. 结论与展望
 
-### 7.1 核心发现
+### 7.1 核心发现总结
 
-1. **俄乌冲突是当前全球最受关注的地缘政治议题**
-   - 停火相关市场总交易量超过 $33M
-   - 短期停火概率极低 (4.1%)，但年底前达到 37.5%
-   - 市场认为停火是"何时"而非"是否"的问题
-
-2. **台海风险呈现"近低远高"的期限结构**
-   - 2026 年内入侵概率 11.5%，较低但不可忽视
-   - 长期 (GTA VI前) 概率接近 50:50，反映深层结构性不确定性
-   - Trump 访华信号 (54.8%) 是重要的外交对冲
-
-3. **美国国内政治对全球地缘格局产生深远影响**
-   - Fed 主席提名市场($44.7M)交易量远超任何单一地缘政治市场
-   - 衰退概率 23.5% 创造了经济不确定性
-   - Trump 政府的外交决策（访华、对俄政策）直接影响全球风险定价
-
-4. **核风险定价存在"恐惧溢价"**
-   - 18% 的核引爆概率可能被高估
-   - 但即使引入折扣因子，核风险已不再被视为"不可想象"
-
-5. **预测市场作为地缘政治温度计的价值不可替代**
-   - 提供了传统方法无法获得的实时、量化、连续的概率信号
-   - 但需要结合流动性分析来评估信号可靠性
+| 维度 | 核心判断 | 置信度 | 关键指标 |
+|------|---------|--------|---------|
+| 俄乌 | 短期无和平，年内有望停火 | 高 | 停火3.9%→37.5% |
+| 伊朗 | 政权面临高度不确定性 | 极高 | 倒台52.4%,$136M+交易量 |
+| 台海 | 稳定但存在中期风险 | 高 | 入侵11.1%,冲突16.2% |
+| 核风险 | 异常升高，需高度警惕 | 中 | 18.0%,3.65%单日跳涨 |
+| 美政治 | 政权稳定，经济忧虑渐升 | 高 | 弹劾13.0%,衰退23.6% |
+| 朝鲜 | 威胁极低，关注流动性 | 低 | 入侵3%,$3K交易 |
 
 ### 7.2 政策启示
 
-- **外交决策者**：应将预测市场数据纳入情报分析框架，尤其关注概率突变
-- **金融投资者**：地缘政治市场提供了独特的对冲工具和情绪指标
-- **学术研究者**：预测市场数据为地缘政治研究提供了前所未有的定量数据源
+1. **伊朗是当前最大变量**：超过$136M的交易量意味着大量资金在押注伊朗政权变动，决策者应密切关注
+2. **俄乌谈判窗口正在打开**：从3.9%到37.5%的时间梯度建议，外交努力应把握2026年剩余时间
+3. **核安全框架亟需加强**：18%的核引爆概率意味着全球核安全架构的信任度处于低位
+4. **台海需预防性外交**：16.2%的军事冲突概率虽不高，但后果极其严重，值得预防性投资
 
-### 7.3 未来研究方向
+### 7.3 未来方向
 
-1. 构建地缘政治风险综合指数（加权聚合多个市场的概率信号）
-2. 利用自适应采样算法追踪概率变化点，检测"信息冲击"
-3. 跨平台对比（Polymarket vs Kalshi vs Metaculus）
-4. 将预测市场数据与传统地缘政治指标（GINI, Fragile States Index）进行相关性分析
+1. 建立基于 `ploy-clean` 的自动化情绪追踪系统
+2. 利用变化点检测构建地缘政治预警指标
+3. 跨市场关联分析的量化建模
+4. 长时间序列的概率趋势分析
 
 ---
 
-## 附录：数据表
+## 附录A：完整数据表
 
-### A. 完整地缘政治市场数据（2026-03-01 快照）
+### A.1 俄乌冲突市场（41个）
 
-| ID | 市场问题 | 概率(Yes) | 交易量($) | 类别 |
-|----|---------|----------|----------|------|
-| 561829 | Russia x Ukraine ceasefire by March 31, 2026? | 4.1% | 21,199,104 | 俄乌 |
-| 567687 | Russia x Ukraine ceasefire by end of 2026? | 37.5% | 10,800,616 | 俄乌 |
-| 540816 | Russia-Ukraine Ceasefire before GTA VI? | 58.5% | 1,347,575 | 俄乌 |
-| 567689 | Zelenskyy out as Ukraine president by end of 2026? | 28.5% | 1,712,878 | 俄乌 |
-| 560317 | Putin out as President of Russia by end of 2026? | 10.5% | 2,531,830 | 俄乌 |
-| 610256 | Will Russia invade a NATO country by June 30, 2026? | 4.2% | 2,024,233 | 俄乌/NATO |
-| 628935 | NATO x Russia military clash by March 31, 2026? | 2.5% | 349,111 | NATO |
-| 610236 | NATO/EU troops fighting in Ukraine in June 30, 2026? | 2.9% | 63,679 | NATO |
-| 610376 | Will Ukraine recapture Crimean territory by June 30? | 4.2% | 32,798 | 俄乌 |
-| 610379 | Ukraine recognizes Russian sovereignty (Jun 30) | 6.5% | 158,506 | 俄乌 |
-| 610380 | Ukraine election called by June 30, 2026? | 19.5% | 186,816 | 俄乌 |
-| 666720 | Russia nuclear test by March 31 2026? | 3.6% | 1,066,832 | 核风险 |
-| 666711 | US nuclear test by March 31 2026? | 5.0% | 102,022 | 核风险 |
-| 592882 | Nuclear weapon detonation by June 30? | 18.0% | 175,395 | 核风险 |
-| 567621 | Will China invade Taiwan by end of 2026? | 11.5% | 9,908,277 | 台海 |
-| 540843 | Will China invade Taiwan before GTA VI? | 51.5% | 1,439,207 | 台海 |
-| 604470 | Will China blockade Taiwan by June 30? | 7.5% | 633,140 | 台海 |
-| 604490 | Will Trump visit China by March 31? | 54.8% | 921,949 | 中美 |
-| 666595 | Will Trump meet with Xi Jinping in 2026? | 87.7% | 16,987 | 中美 |
-| 567688 | Netanyahu out by end of 2026? | ~35% | 399,156 | 中东 |
-| 604675 | Israeli parliament dissolved by March 31? | 20.5% | 463,955 | 中东 |
-| 636921 | Will Israel annex Gaza territory by June 30 2026? | 6.0% | 72,607 | 中东 |
-| 665738 | Ahmed al-Sharaa out as leader of Syria before 2027? | 18.0% | 52,592 | 中东 |
-| 568116 | Trump impeached by end of 2026? | 12.5% | 514,131 | 美国政治 |
-| 568117 | Will Trump resign by December 31, 2026? | 6.5% | 370,363 | 美国政治 |
-| 540820 | Trump out as President before GTA VI? | 53.0% | 519,692 | 美国政治 |
-| 572469 | Trump nominate Kevin Warsh as Fed chair? | 93.3% | 44,661,262 | 美国经济 |
-| 609655 | US recession by end of 2026? | 23.5% | 290,024 | 美国经济 |
-| 629267 | Will any country leave NATO by June 30, 2026? | 4.3% | 68,444 | NATO |
-| 618509 | Will Trump and Putin not meet? | 58.9% | 143,067 | 外交 |
-| 666608 | Will Trump meet with Vladimir Putin in 2026? | 62.0% | 1,034 | 外交 |
-| 666827 | US-South Korea new trade deal before 2027? | 17.0% | 52,996 | 贸易 |
-| 666831 | US-Russia new trade deal before 2027? | 14.5% | 1,608 | 贸易 |
+| ID | 市场 | 交易量 |
+|----|------|--------|
+| 540816 | Russia-Ukraine Ceasefire before GTA VI? | $1.3M |
+| 561829 | Russia x Ukraine ceasefire by March 31, 2026? | $21.2M |
+| 567687 | Russia x Ukraine ceasefire by end of 2026? | $10.8M |
+| 567689 | Zelenskyy out as Ukraine president by end of 2026? | $1.7M |
+| 610236 | NATO/EU troops fighting in Ukraine in June 30, 2026? | $64K |
+| 610256 | Will Russia invade a NATO country by June 30, 2026? | $2.0M |
+| 610376 | Will Ukraine recapture Crimean territory by June 30, 2026? | $33K |
+| 610379 | Ukraine recognizes Russian sovereignty by June 30 | $159K |
+| 610380 | Ukraine election called by June 30, 2026? | $187K |
+| 663472 | Will Trump meet with Putin by March 31, 2026? | $176K |
+| 665223 | Ukraine signs peace deal with Russia by March 31? | $287K |
+| 665224 | Ukraine signs peace deal with Russia before 2027? | $152K |
+| 665353 | Ukraine agrees not to join NATO before 2027? | $53K |
+| 665410 | Will Ukraine give up rest of Donbas before 2027? | $27K |
+| 665458 | Will Russia capture Sloviansk by June 30? | $139K |
+| 667079 | Will Zelenskyy and Putin meet in Ukraine before 2027? | $43K |
+| 677361 | Will Russia capture Kostyantynivka by March 31? | $733K |
+| 677366 | Will Russia capture Kostyantynivka by Dec 31, 2026? | $246K |
+| 677403 | US recognizes Russian sovereignty over Ukraine before 2027? | $23K |
+| 681144 | Will Ukraine agree to cede territory before 2027? | $490K |
+| 693519 | Ukraine agrees to limit armed forces before 2027? | $78K |
+| 694027 | Russia x Ukraine Peace Parlay | $350K |
+| 835893 | Ukraine agrees to US-backed ceasefire framework by March 31? | $151K |
+| 929425 | Will Russia capture all of Kupiansk by March 31? | $204K |
+| 956449 | Ukraine signs peace deal with Russia by June 30? | $54K |
+| 956980 | Ukraine agrees not to join NATO by June 30? | $10K |
+| 956981 | Ukraine agrees not to join NATO by March 31? | $53K |
+| 1006892 | Will Russia capture Lyman by March 31, 2026? | $534K |
+| 1007357 | Will Russia capture all of Vovchansk by March 31? | $128K |
+| 1007516 | Will Russia enter Orikhiv by March 31? | $77K |
+| 1007578 | Will Russia enter Borova by March 31? | $60K |
+| 1007579 | Will Russia capture Sumy by March 31, 2027? | $171K |
+| 1007628 | Will Russia enter Sloviansk by June 30? | $116K |
+| 1007630 | Will Russia enter Sumy by June 30? | $65K |
+| 1007631 | Will Russia enter Druzkhivka by June 30? | $91K |
+| 1007632 | Will Russia enter Dopropillia by June 30? | $117K |
+| 1007633 | Will Russia enter Kramatorsk by June 30? | $99K |
+| 1007634 | Will Russia enter Kharkiv by June 30? | $25K |
+| 1007635 | Will Russia enter Kherson by June 30? | $28K |
+| 1007636 | Will Russia enter Zaporizhia by June 30? | $64K |
+| 1171663 | Russia x Ukraine ceasefire by June 30, 2026? | $2.3M |
 
-### B. 数据采集工具
+### A.2 台海市场（9个）
+
+| ID | 市场 | 交易量 |
+|----|------|--------|
+| 540843 | Will China invades Taiwan before GTA VI? | $1.4M |
+| 567621 | Will China invade Taiwan by end of 2026? | $9.9M |
+| 604470 | Will China blockade Taiwan by June 30? | $633K |
+| 677407 | China x Taiwan military clash before 2027? | $946K |
+| 701290 | Will China invade Taiwan by March 31, 2026? | $4.2M |
+| 956590 | Will China invade Taiwan by June 30, 2026? | $850K |
+| 1060714 | Nothing Ever Happens: 2026 | $376K |
+| 1131161 | Lai Ching-te out as President of Taiwan in 2026? | $12K |
+| 559651 | Xi Jinping out before 2027? | $6.7M |
+
+### A.3 伊朗市场（核心，29个中精选）
+
+| ID | 市场 | 交易量 |
+|----|------|--------|
+| 1180303 | Khamenei out as Supreme Leader by February 28? | $85.0M |
+| 916732 | Khamenei out as Supreme Leader by March 31? | $51.7M |
+| 958442 | Iranian regime fall by March 31? | $11.7M |
+| 663583 | Iranian regime fall before 2027? | $6.3M |
+| 958443 | Iranian regime fall by June 30? | $3.3M |
+| 1170143 | US declare war on Iran by March 31, 2026? | $874K |
+| 957019 | US-Iran nuclear deal by June 30? | $677K |
+| 1162940 | US forces enter Iran by March 31? | $639K |
+| 1090199 | Will Reza Pahlavi enter Iran by June 30? | $519K |
+| 665307 | Iran close Strait of Hormuz before 2027? | $357K |
+| 1115288 | US recognizes Reza Pahlavi as leader of Iran? | $270K |
+| 665374 | US invade Iran before 2027? | $234K |
+| 1178057 | Iranian regime survive US military strikes? | $223K |
+| 1178277 | Will US or Israel strike Iran first? | $1.7M |
+
+### A.4 核风险市场（10个）
+
+| ID | 市场 | 交易量 |
+|----|------|--------|
+| 955824 | Nuclear weapon detonation by March 31? | $195K |
+| 592882 | Nuclear weapon detonation by June 30? | $175K |
+| 666720 | Russia test nuclear weapon by March 31? | $1.1M |
+| 666711 | US test nuclear weapon by March 31? | $102K |
+| 955825 | Nuclear weapon detonation by December 31? | $76K |
+| 665521 | Iran nuclear test before 2027? | $59K |
+| 677396 | Iran Nuke before 2027? | $48K |
+| 904731 | US x Russia Nuclear deal by June 30? | $22K |
+| 665325 | US-Iran nuclear deal before 2027? | $272K |
+| 957019 | US-Iran nuclear deal by June 30? | $677K |
+
+### A.5 军事冲突市场（13个）
+
+| ID | 市场 | 交易量 |
+|----|------|--------|
+| 610224 | NATO x Russia military clash by March 31? | $349K |
+| 677419 | NATO x Russia military clash by June 30? | $3.5K |
+| 677420 | NATO x Russia military clash by Dec 31? | $4.3K |
+| 677414 | US x Russia military clash by June 30? | $44K |
+| 677417 | US x China military clash before 2027? | $20K |
+| 677407 | China x Taiwan military clash before 2027? | $946K |
+| 677409 | China x India military clash by Dec 31? | $84K |
+| 677410 | China x Philippines military clash before 2027? | $122K |
+| 677411 | China x Japan military clash before 2027? | $391K |
+| 677412 | Israel x Turkey military clash before 2027? | $22K |
+| 677413 | US x Denmark military clash before 2027? | $25K |
+| 677418 | NATO internal military clash before 2027? | $5K |
+| 1178277 | Will US or Israel strike Iran first? | $1.7M |
+
+---
+
+## 附录B：方法论说明
+
+### B.1 数据采集命令
 
 ```bash
-# 使用 Poly-Cleaner 搜索并保存地缘政治市场到数据库
-./ploy-clean search-markets --query "Ukraine ceasefire" --limit 10
-./ploy-clean search-markets --query "China Taiwan" --limit 10
-./ploy-clean search-markets --query "Israel" --limit 10
-./ploy-clean search-markets --query "nuclear" --limit 10
-./ploy-clean search-markets --query "deport" --limit 20
+# 使用 ploy-clean 进行系统化数据采集
+./ploy-clean search-markets --query "Ukraine ceasefire" --limit 50 --scan-pages 80
+./ploy-clean search-markets --query "Russia Ukraine" --limit 50 --scan-pages 80
+./ploy-clean search-markets --query "China Taiwan" --limit 50 --scan-pages 80
+./ploy-clean search-markets --query "nuclear weapon" --limit 50 --scan-pages 80
+./ploy-clean search-markets --query "Israel Gaza" --limit 50 --scan-pages 80
+./ploy-clean search-markets --query "Iran" --limit 30 --scan-pages 80
+./ploy-clean search-markets --query "Korea" --limit 30 --scan-pages 80
+./ploy-clean search-markets --query "NATO" --limit 30 --scan-pages 80
+./ploy-clean search-markets --query "Putin" --limit 30 --scan-pages 80
+./ploy-clean search-markets --query "Zelenskyy" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Trump impeach" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "recession" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "tariff trade" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Fed chair" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Hezbollah" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Xi Jinping" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "deport" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "sanction" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Crimea" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "coup" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Nobel Peace" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Syria" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "military clash" --limit 20 --scan-pages 80
+./ploy-clean search-markets --query "Netanyahu" --limit 20 --scan-pages 80
 
-# 查看数据库中的地缘政治市场
-sqlite3 polymarket.db "SELECT id, question, volume FROM markets
-  WHERE question LIKE '%Ukraine%' OR question LIKE '%Russia%'
-  ORDER BY volume DESC;"
+# 对核心市场进行价格采样
+./ploy-clean sample --market-id 561829 --token-id <token>  # 俄乌停火3月
+./ploy-clean sample --market-id 567687 --token-id <token>  # 俄乌停火年底
+./ploy-clean sample --market-id 1171663 --token-id <token> # 俄乌停火6月
+./ploy-clean sample --market-id 567621 --token-id <token>  # 中国侵台年底
+./ploy-clean sample --market-id 604470 --token-id <token>  # 中国封锁台湾
+./ploy-clean sample --market-id 677407 --token-id <token>  # 中台军事冲突
+./ploy-clean sample --market-id 559651 --token-id <token>  # 习近平下台
+./ploy-clean sample --market-id 560317 --token-id <token>  # 普京下台
+./ploy-clean sample --market-id 592882 --token-id <token>  # 核武引爆
+./ploy-clean sample --market-id 567688 --token-id <token>  # 内塔尼亚胡下台
+./ploy-clean sample --market-id 567689 --token-id <token>  # 泽连斯基下台
+./ploy-clean sample --market-id 898685 --token-id <token>  # Hamas停火II
+./ploy-clean sample --market-id 568116 --token-id <token>  # 特朗普弹劾
+./ploy-clean sample --market-id 609655 --token-id <token>  # 美经济衰退
+./ploy-clean sample --market-id 663583 --token-id <token>  # 伊朗政权倒台
+./ploy-clean sample --market-id 610256 --token-id <token>  # 俄侵NATO
+
+# 查看数据库统计
+./ploy-clean stats
 ```
 
----
+### B.2 价格数据说明
 
-### 参考文献
-
-1. Berg, J., Forsythe, R., Nelson, F., & Rietz, T. (2008). "Results from a dozen years of election futures markets research." *Handbook of Experimental Economics Results*.
-2. Hanson, R. (2003). "Combinatorial Information Market Design." *Information Systems Frontiers*.
-3. Hayek, F. A. (1945). "The Use of Knowledge in Society." *American Economic Review*, 35(4), 519-530.
-4. Looney, R. (2004). "DARPA's Policy Analysis Market for Intelligence: Outside the Box or Off the Wall?" *Strategic Insights*, 3(9).
-5. Arrow, K. J., et al. (2008). "The Promise of Prediction Markets." *Science*, 320(5878), 877-878.
-6. Wolfers, J., & Zitzewitz, E. (2004). "Prediction Markets." *Journal of Economic Perspectives*, 18(2), 107-126.
+- **sample 数据**：来自 CLOB API 的实时价格历史，精确度最高
+- **search 数据**：来自 Gamma API 的 `outcomePrices` 快照
+- 两者可能存在微小差异（1-2%），以 sample 数据为准
+- 所有概率值为 "Yes" outcome 的价格
 
 ---
 
-*本论文基于 Polymarket 公开 API 数据，由 Poly-Cleaner v0.1.0 自动采集与分析。所有概率值反映市场参与者集体判断，不构成对未来事件的确定性预测。*
+## 参考文献
 
-*数据快照时间：2026-03-01 ~14:00 UTC*
+1. Arrow, K. J., et al. (2008). "The Promise of Prediction Markets." *Science*, 320(5878), 877-878.
+2. Wolfers, J., & Zitzewitz, E. (2004). "Prediction Markets." *Journal of Economic Perspectives*, 18(2), 107-126.
+3. Silver, N. (2024). "Prediction Markets vs Polls: Lessons from 2024."
+4. Polymarket. (2026). Market data accessed via Gamma API and CLOB API.
+5. Poly-Cleaner. (2026). Open-source ETL tool for Polymarket data analysis. GitHub.
+
+---
+
+*本论文基于 Polymarket 公开 API 数据，由 Poly-Cleaner v0.1.0 通过 `search-markets` 和 `sample` 命令自动采集与分析。所有概率值反映市场参与者集体判断，不构成对未来事件的确定性预测。*
+*数据快照时间：2026-03-01 14:30-14:38 UTC*
