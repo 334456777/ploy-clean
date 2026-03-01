@@ -53,6 +53,7 @@ pub struct DatabaseConfig {
 pub struct MarketsConfig {
     pub min_volume: f64,
     pub max_markets: usize,
+    pub max_search_results: usize,
     pub categories: Vec<String>,
 }
 
@@ -112,6 +113,7 @@ impl Default for Config {
             markets: MarketsConfig {
                 min_volume: 1000.0,
                 max_markets: 1000,
+                max_search_results: 50,
                 categories: vec!["politics".to_string(), "economics".to_string()],
             },
             logging: LoggingConfig {

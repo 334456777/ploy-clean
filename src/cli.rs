@@ -68,6 +68,17 @@ pub enum Commands {
     /// 初始化数据库
     InitDb,
 
+    /// 搜索市场
+    SearchMarkets {
+        /// 搜索关键词
+        #[arg(short, long)]
+        query: String,
+
+        /// 最大返回数量（覆盖配置文件中的默认值）
+        #[arg(short, long)]
+        limit: Option<usize>,
+    },
+
     /// 显示统计信息
     Stats {
         /// 市场 ID

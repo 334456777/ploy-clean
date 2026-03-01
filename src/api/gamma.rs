@@ -48,11 +48,15 @@ impl GammaClient {
         Ok(gamma_market.into())
     }
 
-    /// 搜索市场
-    pub async fn search_markets(&self, query: &str) -> Result<Vec<Market>> {
-        let path = format!("/markets?query={}", urlencoding::encode(query));
+    /// 搜索市场，支持限制最大返回数量
+    pub async fn search_markets(&self, query: &str, limit: usize) -> Result<Vec<Market>> {
+        let path = format!("/markets?query={}&limit={}", urlencoding::encode(query), limit);
         let gamma_markets: Vec<GammaMarket> = self.client.get(&path).await?;
 
-        Ok(gamma_markets.into_iter().map(Into::into).collect())
+        Ok(gamma_markets
+            .into_iter()
+            .take(limit)
+            .map(Into::into)
+            .collect())
     }
 }

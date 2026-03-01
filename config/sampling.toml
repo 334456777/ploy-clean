@@ -51,6 +51,8 @@ cache_size_mb = 64
 # 市场过滤
 min_volume = 1000
 max_markets = 1000
+# 市场搜索最大返回数量
+max_search_results = 50
 categories = ["politics", "economics", "sports", "crypto"]
 
 [logging]

@@ -47,6 +47,10 @@ change_point_confidence_level = 0.95
 gamma_api_base_url = "https://gamma-api.polymarket.com"
 clob_api_base_url = "https://clob.polymarket.com"
 max_concurrent_requests = 16
+
+[markets]
+# 市场搜索配置
+max_search_results = 50     # 搜索最大返回数量（默认 50）
 ```
 
 ## 使用
@@ -60,6 +64,10 @@ max_concurrent_requests = 16
 
 # 获取单个市场详情
 ./target/release/ploy-clean get-market --id <市场ID>
+
+# 搜索市场（结果自动保存到数据库）
+./target/release/ploy-clean search-markets --query "Trump"
+./target/release/ploy-clean search-markets --query "Bitcoin" --limit 10
 
 # 对指定市场执行自适应采样
 ./target/release/ploy-clean sample --market-id <ID> --token-id <TOKEN>
@@ -78,6 +86,7 @@ max_concurrent_requests = 16
 | `init-db` | 初始化数据库 | `./ploy-clean init-db` |
 | `fetch-markets` | 获取所有市场列表 | `./ploy-clean fetch-markets` |
 | `get-market` | 获取单个市场详情 | `./ploy-clean get-market --id 517310` |
+| `search-markets` | 搜索市场并保存到数据库 | `./ploy-clean search-markets -q "Trump"` |
 | `sample` | 对指定市场执行自适应采样 | `./ploy-clean sample -m 517310 -t <TOKEN>` |
 | `run` | 运行完整 ETL 流程 | `./ploy-clean run` |
 | `stats` | 显示统计信息 | `./ploy-clean stats` |

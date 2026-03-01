@@ -59,6 +59,9 @@ async fn main() -> Result<()> {
         cli::Commands::Run { concurrency, category } => {
             run_etl(&config, &args.database, concurrency, category).await?;
         }
+        cli::Commands::SearchMarkets { query, limit } => {
+            search_markets(&config, &args.database, &query, limit).await?;
+        }
         cli::Commands::Stats { market_id } => {
             show_stats(&args.database, market_id)?;
         }
@@ -276,6 +279,53 @@ async fn run_etl(
 
     bar.finish_with_message("ETL process completed!");
     info!("ETL process completed successfully");
+
+    Ok(())
+}
+
+/// 搜索市场
+async fn search_markets(
+    config: &Config,
+    db_path: &std::path::PathBuf,
+    query: &str,
+    limit: Option<usize>,
+) -> Result<()> {
+    let max_results = limit.unwrap_or(config.markets.max_search_results);
+    info!("Searching markets with query: '{}', limit: {}", query, max_results);
+
+    let gamma_client = api::GammaClient::new(&config.api.gamma_api_base_url)?;
+    let markets = gamma_client.search_markets(query, max_results).await?;
+
+    if markets.is_empty() {
+        println!("\n未找到与 '{}' 匹配的市场", query);
+        return Ok(());
+    }
+
+    // 将搜索结果写入数据库
+    let db = Database::open(db_path)?;
+    db.init_schema()?;
+
+    let mut saved_count = 0;
+    for market in &markets {
+        match db.upsert_market(market) {
+            Ok(_) => saved_count += 1,
+            Err(e) => warn!("Failed to save market {}: {}", market.id, e),
+        }
+    }
+    info!("Saved {}/{} markets to database", saved_count, markets.len());
+
+    println!("\n=== 搜索结果: '{}' ({}/{} 条, 已保存 {} 条到数据库) ===\n",
+        query, markets.len(), max_results, saved_count);
+
+    for (i, market) in markets.iter().enumerate() {
+        println!("{}. {} (ID: {})", i + 1, market.question, market.id);
+        println!("   Active: {} | Closed: {} | Volume: {:?} | Liquidity: {:?}",
+            market.active, market.closed, market.volume, market.liquidity);
+        if let Some(ref tokens) = market.clob_token_ids {
+            println!("   Token IDs: {:?}", tokens);
+        }
+        println!();
+    }
 
     Ok(())
 }
