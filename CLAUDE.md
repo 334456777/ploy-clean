@@ -367,6 +367,122 @@ src/
 4. **WAL 模式**: 数据库使用 WAL 模式，会有 `-wal` 和 `-shm` 临时文件
 5. **索引**: 重要查询已建索引，充分利用可提高性能
 
+## 研究论文编写流程
+
+当需要编写基于 Polymarket 数据的研究论文时，**必须严格按照以下流程执行**。此流程在地缘政治市场情绪分析中已验证有效。
+
+### 第一阶段：数据采集
+
+1. **确定研究主题的关键词集合**
+   - 列出覆盖研究主题的所有关键词（中英文）
+   - 关键词应覆盖：事件名、地名、人名、相关概念
+   - 示例（地缘政治）：`Ukraine`, `Russia`, `ceasefire`, `China`, `Taiwan`, `invasion`, `NATO`, `nuclear`, `Israel`, `Gaza`, `Iran`, `Korea`, `Putin`, `tariff`, `sanction`, `recession`, `deport`
+
+2. **通过 search-markets 命令批量搜索**
+   ```bash
+   # 每个关键组合单独搜索，结果自动保存到数据库
+   ./ploy-clean search-markets --query "Ukraine ceasefire" --limit 20
+   ./ploy-clean search-markets --query "China Taiwan" --limit 20
+   ./ploy-clean search-markets --query "nuclear" --limit 20
+   ./ploy-clean search-markets --query "Israel Gaza" --limit 20
+   # ... 覆盖所有关键词
+   ```
+
+3. **补充扫描：通过 API 全量遍历获取遗漏市场**
+   - Gamma API 的 `query` 参数**不支持服务端搜索**（已验证无效）
+   - `search_markets()` 采用客户端全量扫描 + 过滤（最多扫描 2000 个市场）
+   - 如果需要更深层数据，直接用 curl 遍历更高 offset：
+   ```bash
+   # 遍历 offset 0-3000，每次 100，用 Python/jq 过滤关键词
+   curl -s "https://gamma-api.polymarket.com/markets?limit=100&offset=0&active=true&closed=false" | \
+     python3 -c "import sys,json; [print(f'{m[\"id\"]}: {m[\"question\"]} (vol: {m.get(\"volume\",0)})') for m in json.load(sys.stdin) if any(k in (m.get('question','')+m.get('slug','')+m.get('description','')).lower() for k in ['ukraine','russia','nuclear'])]"
+   ```
+
+4. **验证数据库中的数据完整性**
+   ```sql
+   -- 检查已保存的相关市场数量和分布
+   SELECT id, question, volume FROM markets
+   WHERE question LIKE '%关键词%'
+   ORDER BY volume DESC;
+   ```
+
+### 第二阶段：数据分析
+
+5. **按维度分类整理市场**
+   - 将采集到的市场按地缘政治维度分组（如：俄乌、台海、中东、美国政治、核风险）
+   - 记录每个市场的：ID、问题、概率(Yes)、交易量、流动性
+
+6. **提取关键指标**
+   - **概率值**：outcome price 即为隐含概率
+   - **交易量**：volume 字段，反映市场关注度和信号可靠性
+   - **流动性**：liquidity 字段，反映价格发现效率
+   - **时间结构**：对比同一议题不同时间窗口的概率（短期/中期/长期）
+
+7. **情绪分类标准**
+   | 概率范围 | 情绪标签 |
+   |---------|---------|
+   | 0-5% | 极度悲观（几乎不可能） |
+   | 5-20% | 悲观（不太可能） |
+   | 20-40% | 偏悲观（有可能但不太乐观） |
+   | 40-60% | 中性/高度不确定 |
+   | 60-80% | 偏乐观（较可能） |
+   | 80-95% | 乐观（很可能） |
+   | 95-100% | 极度乐观（几乎确定） |
+
+8. **跨市场关联分析**
+   - 识别不同市场之间的关联结构（如：停火概率 ↔ 核风险概率）
+   - 分析时间维度的概率梯度（短期低→长期高 = "近安远忧"模式）
+   - 评估流动性对信号可靠性的影响
+
+### 第三阶段：论文撰写
+
+9. **论文结构模板**（参考 `docs/geopolitical_market_sentiment.md`）
+   ```
+   # 标题（中英双语）
+   ## 摘要（300字，含核心发现 3-5 点）
+   ## 1. 引言（研究背景、问题、文献综述）
+   ## 2. 研究方法与数据来源（采集工具、分析方法、数据质量说明）
+   ## 3. 全景分析（市场分布总览表、交易量分布图）
+   ## 4. 核心议题深度分析（每个维度单独一节）
+      ### 4.x 议题名
+      - 市场数据矩阵（表格：市场/概率/交易量/信号强度）
+      - 情绪分析（文字解读）
+      - 结构性洞察
+   ## 5. 市场情绪传导机制分析（跨市场联动、时间梯度、流动性矩阵）
+   ## 6. 预测市场的优势与局限
+   ## 7. 结论与展望（核心发现总结、政策启示、未来方向）
+   ## 附录：完整数据表
+   ## 参考文献
+   ```
+
+10. **数据呈现要求**
+    - 每个核心议题必须有**数据矩阵表格**（市场/概率/交易量/信号强度）
+    - 交易量分布使用 ASCII **柱状图**可视化
+    - 跨市场关联使用 ASCII **流程图/树形图**展示
+    - 所有概率值精确到小数点后一位
+    - 交易量使用 `$xxM` 或 `$xxK` 格式
+
+11. **分析质量检查清单**
+    - [ ] 所有概率值是否来自实际 API 数据？
+    - [ ] 是否注明了数据快照时间？
+    - [ ] 低流动性市场是否标注了信号可靠性警告？
+    - [ ] 是否分析了时间维度的概率梯度？
+    - [ ] 是否有跨市场关联分析？
+    - [ ] 是否讨论了预测市场方法论的局限性？
+
+### API 重要注意事项
+
+- **Gamma API 不支持关键词搜索**：`query`, `text_query`, `slug_contains`, `tag`, `category` 参数均被忽略
+- **必须使用客户端过滤**：`search_markets()` 已实现批量扫描 + AND 逻辑关键词匹配
+- **扫描范围限制**：默认最多扫描 2000 个市场（20 页 × 100），深层数据需手动 curl
+- **搜索结果自动入库**：`search-markets` 命令的结果会自动 upsert 到 markets 表
+
+### 已有论文参考
+
+| 文件 | 主题 | 写作日期 |
+|------|------|---------|
+| `docs/geopolitical_market_sentiment.md` | 地缘政治市场情绪分析（俄乌/台海/中东/美国/核风险） | 2026-03-01 |
+
 ## 故障排查
 
 ```bash
