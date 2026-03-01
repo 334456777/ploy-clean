@@ -49,14 +49,47 @@ impl GammaClient {
     }
 
     /// 搜索市场，支持限制最大返回数量
+    /// 注意: Gamma API 不支持服务端关键词搜索，采用客户端过滤实现
     pub async fn search_markets(&self, query: &str, limit: usize) -> Result<Vec<Market>> {
-        let path = format!("/markets?query={}&limit={}", urlencoding::encode(query), limit);
-        let gamma_markets: Vec<GammaMarket> = self.client.get(&path).await?;
+        let query_lower = query.to_lowercase();
+        let keywords: Vec<&str> = query_lower.split_whitespace().collect();
+        let mut results = Vec::new();
+        let batch_size = 100;
+        let max_pages = 20; // 最多扫描 2000 个市场
 
-        Ok(gamma_markets
-            .into_iter()
-            .take(limit)
-            .map(Into::into)
-            .collect())
+        for page in 0..max_pages {
+            let offset = page * batch_size;
+            let path = format!(
+                "/markets?limit={}&offset={}&active=true&closed=false",
+                batch_size, offset
+            );
+            let gamma_markets: Vec<GammaMarket> = self.client.get(&path).await?;
+
+            if gamma_markets.is_empty() {
+                break;
+            }
+
+            for m in gamma_markets {
+                let question_lower = m.question.to_lowercase();
+                let slug_lower = m.slug.as_deref().unwrap_or("").to_lowercase();
+                let desc_lower = m.description.as_deref().unwrap_or("").to_lowercase();
+
+                // 所有关键词都必须匹配（AND 逻辑）
+                let matched = keywords.iter().all(|kw| {
+                    question_lower.contains(kw)
+                        || slug_lower.contains(kw)
+                        || desc_lower.contains(kw)
+                });
+
+                if matched {
+                    results.push(Market::from(m));
+                    if results.len() >= limit {
+                        return Ok(results);
+                    }
+                }
+            }
+        }
+
+        Ok(results)
     }
 }

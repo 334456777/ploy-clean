@@ -56,6 +56,8 @@ pub struct GammaMarket {
     pub end_date: Option<String>,  // ISO 8601 日期字符串
     #[serde(rename = "id")]
     pub id: Option<String>,
+    #[serde(rename = "description")]
+    pub description: Option<String>,
     #[serde(rename = "clobTokenIds")]
     pub clob_token_ids: Option<String>,
 }
