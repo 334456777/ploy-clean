@@ -59,8 +59,8 @@ async fn main() -> Result<()> {
         cli::Commands::Run { concurrency, category } => {
             run_etl(&config, &args.database, concurrency, category).await?;
         }
-        cli::Commands::SearchMarkets { query, limit } => {
-            search_markets(&config, &args.database, &query, limit).await?;
+        cli::Commands::SearchMarkets { query, limit, scan_pages } => {
+            search_markets(&config, &args.database, &query, limit, scan_pages).await?;
         }
         cli::Commands::Stats { market_id } => {
             show_stats(&args.database, market_id)?;
@@ -289,12 +289,30 @@ async fn search_markets(
     db_path: &std::path::PathBuf,
     query: &str,
     limit: Option<usize>,
+    scan_pages: Option<usize>,
 ) -> Result<()> {
     let max_results = limit.unwrap_or(config.markets.max_search_results);
-    info!("Searching markets with query: '{}', limit: {}", query, max_results);
+    let max_pages = scan_pages.unwrap_or(config.markets.max_scan_pages);
+    info!("Searching markets with query: '{}', limit: {}, scan_pages: {}", query, max_results, max_pages);
 
     let gamma_client = api::GammaClient::new(&config.api.gamma_api_base_url)?;
-    let markets = gamma_client.search_markets(query, max_results).await?;
+
+    // 创建扫描进度条
+    let scan_bar = ProgressBar::new(max_pages as u64);
+    scan_bar.set_style(
+        ProgressStyle::default_bar()
+            .template("[{elapsed_precise}] {bar:40.cyan/blue} {pos}/{len} pages scanned | {msg}")
+            .expect("invalid template")
+            .progress_chars("##-"),
+    );
+    scan_bar.set_message(format!("searching '{}'", query));
+
+    let markets = gamma_client.search_markets(query, max_results, max_pages, |page, found| {
+        scan_bar.set_position(page as u64);
+        scan_bar.set_message(format!("found {} matches", found));
+    }).await?;
+
+    scan_bar.finish_with_message(format!("done, {} matches found", markets.len()));
 
     if markets.is_empty() {
         println!("\n未找到与 '{}' 匹配的市场", query);

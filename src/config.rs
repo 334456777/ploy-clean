@@ -54,7 +54,16 @@ pub struct MarketsConfig {
     pub min_volume: f64,
     pub max_markets: usize,
     pub max_search_results: usize,
+    /// 搜索时最大扫描页数（每页 100 个市场）
+    #[serde(default = "MarketsConfig::default_max_scan_pages")]
+    pub max_scan_pages: usize,
     pub categories: Vec<String>,
+}
+
+impl MarketsConfig {
+    fn default_max_scan_pages() -> usize {
+        20
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -114,6 +123,7 @@ impl Default for Config {
                 min_volume: 1000.0,
                 max_markets: 1000,
                 max_search_results: 50,
+                max_scan_pages: 20,
                 categories: vec!["politics".to_string(), "economics".to_string()],
             },
             logging: LoggingConfig {

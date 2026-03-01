@@ -77,6 +77,10 @@ pub enum Commands {
         /// 最大返回数量（覆盖配置文件中的默认值）
         #[arg(short, long)]
         limit: Option<usize>,
+
+        /// 扫描页数（每页 100 个市场，默认 20 页=2000 市场，--scan-pages 50 可扫描 5000 个）
+        #[arg(long)]
+        scan_pages: Option<usize>,
     },
 
     /// 显示统计信息

@@ -53,6 +53,8 @@ min_volume = 1000
 max_markets = 1000
 # 市场搜索最大返回数量
 max_search_results = 50
+# 搜索时最大扫描页数（每页 100 个市场，20 页=2000，50 页=5000）
+max_scan_pages = 20
 categories = ["politics", "economics", "sports", "crypto"]
 
 [logging]

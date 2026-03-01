@@ -48,14 +48,28 @@ impl GammaClient {
         Ok(gamma_market.into())
     }
 
-    /// 搜索市场，支持限制最大返回数量
-    /// 注意: Gamma API 不支持服务端关键词搜索，采用客户端过滤实现
-    pub async fn search_markets(&self, query: &str, limit: usize) -> Result<Vec<Market>> {
+    /// 搜索市场，支持限制最大返回数量和扫描深度
+    /// 注意: Gamma API 不支持服务端关键词搜索，采用客户端全量扫描 + 过滤实现
+    ///
+    /// # 参数
+    /// - `query`: 搜索关键词（空格分隔，AND 逻辑）
+    /// - `limit`: 最大返回结果数
+    /// - `max_pages`: 最大扫描页数（每页 100 个市场）
+    /// - `on_progress`: 进度回调 (当前页, 已找到结果数)
+    pub async fn search_markets<F>(
+        &self,
+        query: &str,
+        limit: usize,
+        max_pages: usize,
+        on_progress: F,
+    ) -> Result<Vec<Market>>
+    where
+        F: Fn(usize, usize),
+    {
         let query_lower = query.to_lowercase();
         let keywords: Vec<&str> = query_lower.split_whitespace().collect();
         let mut results = Vec::new();
         let batch_size = 100;
-        let max_pages = 20; // 最多扫描 2000 个市场
 
         for page in 0..max_pages {
             let offset = page * batch_size;
@@ -66,6 +80,7 @@ impl GammaClient {
             let gamma_markets: Vec<GammaMarket> = self.client.get(&path).await?;
 
             if gamma_markets.is_empty() {
+                on_progress(page + 1, results.len());
                 break;
             }
 
@@ -84,10 +99,13 @@ impl GammaClient {
                 if matched {
                     results.push(Market::from(m));
                     if results.len() >= limit {
+                        on_progress(page + 1, results.len());
                         return Ok(results);
                     }
                 }
             }
+
+            on_progress(page + 1, results.len());
         }
 
         Ok(results)
