@@ -1,0 +1,24 @@
+[package]
+name = "ploy-clean"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance adaptive sampling ETL tool for Polymarket data"
+authors = ["yusteven"]
+
+[dependencies]
+tokio = { version = "1.42", features = ["full"] }
+reqwest = { version = "0.12", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+rusqlite = { version = "0.32", features = ["bundled", "hooks"] }
+anyhow = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+toml = "0.8"
+clap = { version = "4.5", features = ["derive"] }
+indicatif = "0.17"
+urlencoding = "2.1"
+
+[dev-dependencies]
+tokio-test = "0.4"
