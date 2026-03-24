@@ -1,59 +1,59 @@
-# Poly-Cleaner 配置文件
-# 自适应采样参数配置
+# Poly-Cleaner Configuration File
+# Adaptive Sampling Parameters
 
 [sampling]
-# 基础采样间隔 (小时)
+# Base sampling interval (hours)
 base_interval_hours = 1
 
-# 采样间隔限制
+# Sampling interval limits
 min_interval_minutes = 1
 max_interval_hours = 24
 
-# 波动率阈值
-high_volatility_threshold = 0.02    # 高波动: 1-5分钟采样
-medium_volatility_threshold = 0.005 # 中波动: 15-30分钟采样
-low_volatility_threshold = 0.001    # 低波动: 1-6小时采样
+# Volatility thresholds
+high_volatility_threshold = 0.02    # High volatility: 1-5min sampling
+medium_volatility_threshold = 0.005 # Medium volatility: 15-30min sampling
+low_volatility_threshold = 0.001    # Low volatility: 1-6h sampling
 
-# 变化率阈值
+# Rate of change thresholds
 velocity_threshold_per_hour = 0.01
 acceleration_threshold_per_hour_squared = 0.005
 
-# 变化点检测
+# Change point detection
 change_point_detection_window_size = 24
 change_point_confidence_level = 0.95
 change_point_min_samples = 12
 
-# 采样策略
+# Sampling strategy
 volatility_multiplier = 10.0
 decay_factor = 0.9
 stable_period_hours = 2
 
 [api]
-# API 端点
+# API endpoints
 gamma_api_base_url = "https://gamma-api.polymarket.com"
 clob_api_base_url = "https://clob.polymarket.com"
 
-# 请求配置
+# Request configuration
 max_retries = 3
 timeout_seconds = 30
 rate_limit_per_minute = 60
 
-# 并发配置
+# Concurrency configuration
 max_concurrent_requests = 16
 
 [database]
-# 数据库配置
+# Database configuration
 url = "sqlite:///data/polymarket.db"
 wal_mode = true
 cache_size_mb = 64
 
 [markets]
-# 市场过滤
+# Market filtering
 min_volume = 1000
 max_markets = 1000
-# 市场搜索最大返回数量
+# Max search results for market search
 max_search_results = 50
-# 搜索时最大扫描页数（每页 100 个市场，20 页=2000，50 页=5000）
+# Max pages to scan during search (100 markets per page, 20 pages=2000, 50 pages=5000)
 max_scan_pages = 20
 categories = ["politics", "economics", "sports", "crypto"]
 
